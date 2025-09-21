@@ -1,103 +1,285 @@
-import Image from "next/image";
+'use client'
 
-export default function Home() {
+import { Button } from '@/components/ui/button'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import {
+  Heart,
+  Users,
+  Award,
+  Utensils,
+  Stethoscope,
+  Clock,
+  Home,
+  BookOpen,
+  Mail,
+  Phone,
+  MapPin,
+} from 'lucide-react'
+import Navbar from '@/components/Navbar'
+import Footer from '@/components/Footer'
+import Hero from '@/components/Hero'
+import Impact from '@/components/Impact'
+import Services from '@/components/Services'
+import Work from '@/components/Work'
+import Stories from '@/components/Stories'
+import Story from '@/components/Story'
+
+export default function Home_() {
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <>
+      <Navbar />
+      <div className='min-h-screen bg-gradient-to-b from-orange-50 to-white'>
+        {/* Hero Section */}
+        <Hero />
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+        {/* Our Impact in Numbers */}
+        <Impact />
+
+        {/* Our Services */}
+        <Services />
+
+        {/* Recent Work */}
+        <section className='py-20 px-4 bg-white'>
+          <div className='max-w-6xl mx-auto'>
+            <div className='text-center mb-16'>
+              <h2 className='text-4xl md:text-5xl font-bold text-gray-800 mb-4'>
+                Recent Work
+              </h2>
+              <p className='text-xl text-gray-600'>
+                Latest projects and initiatives
+              </p>
+            </div>
+            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8'>
+              <Card className='overflow-hidden border-orange-200 hover:shadow-lg transition-shadow'>
+                <div className='h-48 bg-gradient-to-br from-orange-200 to-amber-200 flex items-center justify-center'>
+                  <Home className='h-20 w-20 text-orange-600' />
+                </div>
+                <CardHeader>
+                  <CardTitle className='text-xl'>
+                    New Entertainment Center
+                  </CardTitle>
+                  <CardDescription>
+                    A state-of-the-art facility with games, movies, and social
+                    spaces for our residents.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Badge
+                    variant='secondary'
+                    className='bg-orange-100 text-orange-800'
+                  >
+                    Completed
+                  </Badge>
+                </CardContent>
+              </Card>
+              <Card className='overflow-hidden border-orange-200 hover:shadow-lg transition-shadow'>
+                <div className='h-48 bg-gradient-to-br from-orange-200 to-amber-200 flex items-center justify-center'>
+                  <Stethoscope className='h-20 w-20 text-orange-600' />
+                </div>
+                <CardHeader>
+                  <CardTitle className='text-xl'>
+                    Medical Wing Expansion
+                  </CardTitle>
+                  <CardDescription>
+                    Expanded medical facilities with advanced equipment and more
+                    treatment rooms.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Badge
+                    variant='secondary'
+                    className='bg-orange-100 text-orange-800'
+                  >
+                    In Progress
+                  </Badge>
+                </CardContent>
+              </Card>
+              <Card className='overflow-hidden border-orange-200 hover:shadow-lg transition-shadow'>
+                <div className='h-48 bg-gradient-to-br from-orange-200 to-amber-200 flex items-center justify-center'>
+                  <Users className='h-20 w-20 text-orange-600' />
+                </div>
+                <CardHeader>
+                  <CardTitle className='text-xl'>
+                    Community Garden Project
+                  </CardTitle>
+                  <CardDescription>
+                    A therapeutic garden where seniors can grow plants and enjoy
+                    nature.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Badge
+                    variant='secondary'
+                    className='bg-orange-100 text-orange-800'
+                  >
+                    Planning
+                  </Badge>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </section>
+        <Work />
+
+        {/* Stories from Our Family */}
+        {/* <section className='py-20 px-4 bg-orange-50'>
+          <div className='max-w-6xl mx-auto'>
+            <div className='text-center mb-16'>
+              <h2 className='text-4xl md:text-5xl font-bold text-gray-800 mb-4'>
+                Stories from Our Family
+              </h2>
+              <p className='text-xl text-gray-600'>
+                Heartwarming stories from our residents and their families
+              </p>
+            </div>
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-8'>
+              <Card className='border-orange-200 hover:shadow-lg transition-shadow'>
+                <CardHeader>
+                  <CardTitle className='text-xl flex items-center'>
+                    <BookOpen className='h-6 w-6 text-orange-600 mr-2' />
+                    Margaret's Journey
+                  </CardTitle>
+                  <CardDescription className='text-base'>
+                    At 85, Margaret found new purpose through our art therapy
+                    program.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className='text-gray-600'>
+                    "I never thought I'd discover my passion for painting at
+                    this age. The staff here encouraged me to try, and now my
+                    artwork is displayed in local galleries. This place gave me
+                    a new lease on life."
+                  </p>
+                  <div className='mt-4 text-sm text-gray-500'>
+                    - Margaret, Resident since 2019
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className='border-orange-200 hover:shadow-lg transition-shadow'>
+                <CardHeader>
+                  <CardTitle className='text-xl flex items-center'>
+                    <Heart className='h-6 w-6 text-orange-600 mr-2' />A Family's
+                    Gratitude
+                  </CardTitle>
+                  <CardDescription className='text-base'>
+                    The Johnson family shares their experience finding the
+                    perfect care for their father.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className='text-gray-600'>
+                    "Finding the right care for our father was overwhelming. The
+                    compassion and professionalism here gave us peace of mind.
+                    Dad is happier and healthier than he's been in years."
+                  </p>
+                  <div className='mt-4 text-sm text-gray-500'>
+                    - The Johnson Family
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </section> */}
+        <Stories />
+        <Story />
+        {/* Footer */}
+        <Footer />
+        {/* <footer className='bg-gray-800 text-white py-16 px-4'>
+          <div className='max-w-6xl mx-auto'>
+            <div className='grid grid-cols-1 md:grid-cols-4 gap-8 mb-8'>
+              <div>
+                <h3 className='text-xl font-bold mb-4 text-orange-400'>
+                  About Us
+                </h3>
+                <p className='text-gray-300'>
+                  Dedicated to providing exceptional care and support for our
+                  elderly community members.
+                </p>
+              </div>
+              <div>
+                <h3 className='text-xl font-bold mb-4 text-orange-400'>
+                  Quick Links
+                </h3>
+                <ul className='space-y-2 text-gray-300'>
+                  <li>
+                    <a
+                      href='#'
+                      className='hover:text-orange-400 transition-colors'
+                    >
+                      Home
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href='#'
+                      className='hover:text-orange-400 transition-colors'
+                    >
+                      Services
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href='#'
+                      className='hover:text-orange-400 transition-colors'
+                    >
+                      Our Work
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href='#'
+                      className='hover:text-orange-400 transition-colors'
+                    >
+                      Stories
+                    </a>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h3 className='text-xl font-bold mb-4 text-orange-400'>
+                  Contact Info
+                </h3>
+                <div className='space-y-2 text-gray-300'>
+                  <div className='flex items-center'>
+                    <Phone className='h-4 w-4 mr-2 text-orange-400' />
+                    <span>(555) 123-4567</span>
+                  </div>
+                  <div className='flex items-center'>
+                    <Mail className='h-4 w-4 mr-2 text-orange-400' />
+                    <span>info@elderlycare.org</span>
+                  </div>
+                  <div className='flex items-center'>
+                    <MapPin className='h-4 w-4 mr-2 text-orange-400' />
+                    <span>123 Care Street, Senior City</span>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <h3 className='text-xl font-bold mb-4 text-orange-400'>
+                  Newsletter
+                </h3>
+                <p className='text-gray-300 mb-4'>
+                  Stay updated with our latest news and events.
+                </p>
+                <Button className='bg-orange-600 hover:bg-orange-700 w-full'>
+                  Subscribe
+                </Button>
+              </div>
+            </div>
+            <div className='border-t border-gray-700 pt-8 text-center text-gray-400'>
+              <p>&copy; 2024 Elderly Care Foundation. All rights reserved.</p>
+            </div>
+          </div>
+        </footer> */}
+      </div>
+    </>
+  )
 }
