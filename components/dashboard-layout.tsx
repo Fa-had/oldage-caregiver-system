@@ -1,35 +1,50 @@
 import Link from 'next/link'
 import { UserRole } from '@/types'
+import {
+  Activity,
+  Calendar,
+  CreditCard,
+  ForkKnife,
+  FormInput,
+  Home,
+  MessagesSquare,
+  User,
+} from 'lucide-react'
+import Header from './admin-header'
 
 interface NavItem {
   href: string
   label: string
+  icon?: React.ComponentType<any>
 }
 
 const navItems: Record<UserRole, NavItem[]> = {
   admin: [
-    { href: '/dashboard/admin', label: 'Overview' },
-    { href: '/dashboard/admin/residents', label: 'Residents' },
-    { href: '/dashboard/admin/appointments', label: 'Appointments' },
-    { href: '/dashboard/admin/staff', label: 'Staff' },
-    { href: '/dashboard/admin/meals', label: 'Meals' },
-    { href: '/dashboard/admin/notices', label: 'Notices' },
-    { href: '/dashboard/admin/finance', label: 'Finance' },
+    { href: '/admin', label: 'Overview', icon: Home },
+    { href: '/admin/residents', label: 'Residents', icon: User },
+    { href: '/admin/appointments', label: 'Appointments', icon: Calendar },
+    { href: '/admin/admit-form', label: 'Admit Form', icon: FormInput },
+    { href: '/admin/staff', label: 'Staff', icon: User },
+    { href: '/admin/meals', label: 'Meals', icon: ForkKnife },
+    { href: '/admin/donations', label: 'Donations', icon: CreditCard },
+    { href: '/admin/medical', label: 'Medical', icon: Activity },
+    { href: '/admin/notices', label: 'Notices', icon: MessagesSquare },
+    { href: '/admin/finance', label: 'Finance', icon: Activity },
   ],
   resident: [
-    { href: '/dashboard/resident', label: 'Overview' },
-    { href: '/dashboard/resident/profile', label: 'Profile' },
-    { href: '/dashboard/resident/meals', label: 'Meal Selection' },
-    { href: '/dashboard/resident/notices', label: 'Notices' },
-    { href: '/dashboard/resident/appointments', label: 'Appointments' },
+    { href: '/resident', label: 'Overview' },
+    { href: '/resident/profile', label: 'Profile' },
+    { href: '/resident/meals', label: 'Meal Selection' },
+    { href: '/resident/notices', label: 'Notices' },
+    { href: '/resident/appointments', label: 'Appointments' },
   ],
   staff: [
-    { href: '/dashboard/staff', label: 'Overview' },
-    { href: '/dashboard/staff/residents', label: 'Assigned Residents' },
+    { href: '/staff', label: 'Overview' },
+    { href: '/staff/residents', label: 'Assigned Residents' },
   ],
   cook: [
-    { href: '/dashboard/cook', label: 'Overview' },
-    { href: '/dashboard/cook/meals', label: 'Meal List' },
+    { href: '/cook', label: 'Overview' },
+    { href: '/cook/meals', label: 'Meal List' },
   ],
   visitor: [],
 }
@@ -56,8 +71,9 @@ export default function DashboardLayout({
               <li key={item.href}>
                 <Link
                   href={item.href}
-                  className='block px-4 py-2 rounded hover:bg-gray-700 transition-colors'
+                  className='px-4 py-2 flex rounded items-center hover:bg-gray-700 transition-colors'
                 >
+                  {item.icon && <item.icon className='mr-2 h-4 w-4' />}
                   {item.label}
                 </Link>
               </li>
@@ -67,7 +83,10 @@ export default function DashboardLayout({
       </aside>
 
       {/* Main Content */}
-      <main className='flex-1 p-8'>{children}</main>
+      <main className='flex-1'>
+        <Header />
+        <div className='p-8'>{children}</div>
+      </main>
     </div>
   )
 }

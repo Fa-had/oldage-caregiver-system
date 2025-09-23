@@ -46,7 +46,7 @@ export default function Home_() {
         <Services />
 
         {/* Recent Work */}
-        <section className='py-20 px-4 bg-white'>
+        {/* <section className='py-20 px-4 bg-white'>
           <div className='max-w-6xl mx-auto'>
             <div className='text-center mb-16'>
               <h2 className='text-4xl md:text-5xl font-bold text-gray-800 mb-4'>
@@ -125,7 +125,7 @@ export default function Home_() {
               </Card>
             </div>
           </div>
-        </section>
+        </section> */}
         <Work />
 
         {/* Stories from Our Family */}
