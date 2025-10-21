@@ -1,4 +1,7 @@
+-- ====== Sample seed data for elderly_care (Bangladeshi-style) ======
+-- Assumes tables already exist as in the corrected schema.
 
+-- Insert rooms
 INSERT INTO rooms (id, room_number, capacity, occupied, status)
 VALUES
   (1, '101', 4, 2, 'available'),
@@ -6,6 +9,7 @@ VALUES
   (3, '103', 6, 0, 'available'),
   (4, '104', 2, 1, 'available');
 
+-- Insert staff (id specified for predictable FKs)
 INSERT INTO staff (id, full_name, role, work_hours, contact, email, status)
 VALUES
   (1, 'Sayed', 'admin', '09:00-17:00', '+8801711000001', 'rafiqul.islam@example.com', 'active'),
@@ -14,6 +18,7 @@ VALUES
   (4, 'Shahriar Alam', 'cook', '06:00-14:00', '+8801711000004', 'shahriar.alam@example.com', 'active'),
   (5, 'Rina Sultana', 'resident_care', '14:00-22:00', '+8801711000005', 'rina.sultana@example.com', 'active');
 
+-- Insert residents (linking caregiver_id and room_id)
 INSERT INTO residents (id, resident_code, full_name, age, gender, joining_date, caregiver_id, status, room_id)
 VALUES
   (1, 'R-0001', 'Abdul Karim', 78, 'male', '2023-02-15', 2, 'active', 1),
@@ -23,10 +28,12 @@ VALUES
   (5, 'R-0005', 'Nurul Islam', 68, 'male', '2020-09-30', 3, 'inactive', 2),
   (6, 'R-0006', 'Shirin Akter', 73, 'female', '2024-09-10', 5, 'active', 4);
 
+-- Update rooms.occupied if you want to ensure accurate totals (optional)
 UPDATE rooms SET occupied = (
   SELECT COUNT(*) FROM residents r WHERE r.room_id = rooms.id
 );
 
+-- Insert users (accounts). password_hash values are placeholders.
 INSERT INTO users (id, full_name, email, password_hash, role, staff_id, resident_id)
 VALUES
   (1, 'sayed', 'admin@eldercare.bd', '1234', 'admin', 1, NULL),
@@ -61,7 +68,7 @@ VALUES
   (5, 6, 5, '2025-10-21', 'breakfast', 1, FALSE, FALSE, FALSE, NULL, 'pending');
 
 -- Medical records
-INSERT INTO medical_records (id, resident_id, staff_id, date, temperature, blood_pressure_systolic, blood_pressure_diastolic, heart_rate, oxygen_level, condition, notes)
+INSERT INTO medical_records (id, resident_id, staff_id, date, temperature, blood_pressure_systolic, blood_pressure_diastolic, heart_rate, oxygen_level, `condition`, notes)
 VALUES
   (1, 1, 2, '2025-10-19', 36.8, 140, 85, 78, 96, 'slightly_elevated', 'BP slightly high, monitoring'),
   (2, 2, 3, '2025-10-19', 36.5, 130, 80, 74, 97, 'normal', 'Routine checkup'),
