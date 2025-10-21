@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { Button } from './ui/button'
 
 export default function Footer() {
@@ -27,7 +28,7 @@ export default function Footer() {
           <p className='text-gray-400'>(+880) 123-456-789</p>
           <p className='text-gray-400'>info@probinibash.com</p>
           <Button className='mt-4 bg-orange-500 px-6 py-2 rounded-lg text-white hover:bg-orange-600'>
-            Appointment Now
+            <Link href={'/appointments'}> Appointment Now</Link>
           </Button>
         </div>
       </div>

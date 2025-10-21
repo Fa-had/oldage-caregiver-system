@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -36,99 +37,148 @@ import {
   AlertCircle,
 } from 'lucide-react'
 import DashboardLayout from '@/components/dashboard-layout'
-import { useState } from 'react'
 
-const financeRecords = [
-  {
-    date: 'Aug 8, 2025',
-    category: 'Income',
-    description: 'Donation from Nahid',
-    amount: '+৳ 500.00',
-    method: 'Bank Transfer',
-  },
-  {
-    date: 'Aug 7, 2025',
-    category: 'Expense',
-    description: 'Medical Supplies Purchase',
-    amount: '-৳ 250.75',
-    method: 'Card',
-  },
-  {
-    date: 'Aug 6, 2025',
-    category: 'Expense',
-    description: '- July Staff Salary',
-    amount: '-৳ 1,200.00',
-    method: 'Bank Transfer',
-  },
-  {
-    date: 'Aug 5, 2025',
-    category: 'Income',
-    description: 'Donation from Forhad',
-    amount: '+৳ 100.00',
-    method: 'Cash',
-  },
-  {
-    date: 'Aug 4, 2025',
-    category: 'Expense',
-    description: 'Utilities Bill',
-    amount: '-৳ 150.00',
-    method: 'Card',
-  },
-]
+interface FinanceRecord {
+  id: number
+  type: 'income' | 'expense'
+  category: string
+  description: string
+  amount: number
+  payment_method: string
+  date: string
+  notes?: string
+}
 
 export default function FinancePage() {
+  const [records, setRecords] = useState<FinanceRecord[]>([])
   const [date, setDate] = useState<Date | undefined>(new Date())
+  const [loading, setLoading] = useState(false)
+  const [form, setForm] = useState({
+    type: 'income',
+    category: '',
+    amount: '',
+    payment_method: 'cash',
+    description: '',
+    notes: '',
+  })
 
-  const handleAddTransaction = (e: React.FormEvent) => {
+  // Fetch all records from backend
+  useEffect(() => {
+    const fetchData = async () => {
+      const res = await fetch('/api/finance')
+      const data = await res.json()
+      console.log('record: ', data)
+
+      setRecords(data)
+    }
+    fetchData()
+  }, [])
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Handle form submission
+    setLoading(true)
+
+    const newRecord = {
+      ...form,
+      amount: parseFloat(form.amount),
+      date: date
+        ? format(date, 'yyyy-MM-dd')
+        : format(new Date(), 'yyyy-MM-dd'),
+    }
+
+    const res = await fetch('/api/finance', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newRecord),
+    })
+
+    if (res.ok) {
+      const added = await res.json()
+      setRecords((prev) => [added, ...prev])
+      setForm({
+        type: 'income',
+        category: '',
+        amount: '',
+        payment_method: 'cash',
+        description: '',
+        notes: '',
+      })
+    } else {
+      alert('Failed to add transaction')
+    }
+
+    setLoading(false)
   }
+
+  const totalIncome =
+    records.length > 0
+      ? records
+          .filter((r) => r.type === 'income')
+          .reduce((sum, r) => Number(sum) + Number(r.amount), 0)
+      : 0
+  const totalExpense =
+    records.length > 0
+      ? records
+          .filter((r) => r.type === 'expense')
+          ?.reduce((sum, r) => Number(sum) + Number(r.amount), 0)
+      : 0
+  const netBalance = totalIncome - totalExpense
+  console.log('Total Income: ', totalIncome)
+  console.log('Total Expense: ', totalExpense)
 
   return (
     <DashboardLayout userRole='admin'>
       <div className='space-y-6'>
-        {/* Stats Cards */}
-        <div className='grid grid-cols-1 md:grid-cols-4 gap-6'>
+        <div className='grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6'>
           <Card className='bg-white shadow-sm'>
             <CardHeader className='flex flex-row items-center justify-between'>
-              <CardTitle className='text-sm'>Total Amount</CardTitle>
+              <CardTitle className='text-sm'>Total Income</CardTitle>
               <TrendingUp className='h-4 w-4 text-green-500' />
             </CardHeader>
             <CardContent>
-              <div className='text-2xl font-bold'>৳ 12,500</div>
+              <div className='text-2xl font-bold text-green-600'>
+                ৳ {totalIncome.toFixed(2)}
+              </div>
             </CardContent>
           </Card>
+
           <Card className='bg-white shadow-sm'>
             <CardHeader className='flex flex-row items-center justify-between'>
-              <CardTitle className='text-sm'>Total Expenses</CardTitle>
+              <CardTitle className='text-sm'>Total Expense</CardTitle>
               <TrendingDown className='h-4 w-4 text-red-500' />
             </CardHeader>
             <CardContent>
-              <div className='text-2xl font-bold'>৳ 8,200</div>
+              <div className='text-2xl font-bold text-red-600'>
+                ৳ {totalExpense.toFixed(2)}
+              </div>
             </CardContent>
           </Card>
+
           <Card className='bg-white shadow-sm'>
             <CardHeader className='flex flex-row items-center justify-between'>
               <CardTitle className='text-sm'>Net Balance</CardTitle>
               <DollarSign className='h-4 w-4 text-blue-500' />
             </CardHeader>
             <CardContent>
-              <div className='text-2xl font-bold'>৳ 4,300</div>
+              <div className='text-2xl font-bold'>
+                ৳ {netBalance.toFixed(2)}
+              </div>
             </CardContent>
           </Card>
+
           <Card className='bg-white shadow-sm'>
             <CardHeader className='flex flex-row items-center justify-between'>
-              <CardTitle className='text-sm'>Pending Payments</CardTitle>
+              <CardTitle className='text-sm'>Total Records</CardTitle>
               <AlertCircle className='h-4 w-4 text-yellow-500' />
             </CardHeader>
             <CardContent>
-              <div className='text-2xl font-bold'>3 payments</div>
+              <div className='text-2xl font-bold'>{records.length}</div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Finance Records and Add Transaction */}
         <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
+          {/* Finance Records Table */}
           <Card className='lg:col-span-2 bg-white shadow-sm'>
             <CardHeader>
               <CardTitle>Finance Records</CardTitle>
@@ -138,40 +188,43 @@ export default function FinancePage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Date</TableHead>
+                    <TableHead>Type</TableHead>
                     <TableHead>Category</TableHead>
                     <TableHead>Description</TableHead>
                     <TableHead>Amount</TableHead>
-                    <TableHead>Payment Method</TableHead>
+                    <TableHead>Method</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {financeRecords.map((record, index) => (
-                    <TableRow key={index}>
-                      <TableCell>{record.date}</TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={
-                            record.category === 'Income'
-                              ? 'default'
-                              : 'secondary'
+                  {records.length > 0 &&
+                    records.map((r) => (
+                      <TableRow key={r.id}>
+                        <TableCell>{format(new Date(r.date), 'PPP')}</TableCell>
+                        <TableCell>
+                          <Badge
+                            className={
+                              r.type === 'income'
+                                ? 'bg-green-100 text-green-700'
+                                : 'bg-red-100 text-red-700'
+                            }
+                          >
+                            {r.type}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>{r.category}</TableCell>
+                        <TableCell>{r.description}</TableCell>
+                        <TableCell
+                          className={
+                            r.type === 'income'
+                              ? 'text-green-600'
+                              : 'text-red-600'
                           }
                         >
-                          {record.category}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>{record.description}</TableCell>
-                      <TableCell
-                        className={
-                          record.amount.startsWith('+')
-                            ? 'text-green-600'
-                            : 'text-red-600'
-                        }
-                      >
-                        {record.amount}
-                      </TableCell>
-                      <TableCell>{record.method}</TableCell>
-                    </TableRow>
-                  ))}
+                          {r.type === 'income' ? '+' : '-'}৳ {r.amount}
+                        </TableCell>
+                        <TableCell>{r.payment_method}</TableCell>
+                      </TableRow>
+                    ))}
                 </TableBody>
               </Table>
             </CardContent>
@@ -182,12 +235,15 @@ export default function FinancePage() {
             <CardHeader>
               <CardTitle>Add Transaction</CardTitle>
             </CardHeader>
-            <CardContent className='space-y-4'>
-              <form onSubmit={handleAddTransaction}>
-                <div className='space-y-2'>
-                  <Label htmlFor='type'>Transaction Type</Label>
-                  <Select defaultValue='income'>
-                    <SelectTrigger id='type'>
+            <CardContent>
+              <form onSubmit={handleSubmit} className='space-y-3'>
+                <div>
+                  <Label>Type</Label>
+                  <Select
+                    value={form.type}
+                    onValueChange={(val) => setForm({ ...form, type: val })}
+                  >
+                    <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -196,8 +252,43 @@ export default function FinancePage() {
                     </SelectContent>
                   </Select>
                 </div>
-                <div className='space-y-2'>
-                  <Label htmlFor='date'>Date</Label>
+
+                <div>
+                  <Label>Category</Label>
+                  <Input
+                    value={form.category}
+                    onChange={(e) =>
+                      setForm({ ...form, category: e.target.value })
+                    }
+                    placeholder='e.g., Donation or Utilities'
+                  />
+                </div>
+
+                <div>
+                  <Label>Description</Label>
+                  <Input
+                    value={form.description}
+                    onChange={(e) =>
+                      setForm({ ...form, description: e.target.value })
+                    }
+                    placeholder='Transaction details'
+                  />
+                </div>
+
+                <div>
+                  <Label>Amount</Label>
+                  <Input
+                    type='number'
+                    value={form.amount}
+                    onChange={(e) =>
+                      setForm({ ...form, amount: e.target.value })
+                    }
+                    placeholder='৳ 0.00'
+                  />
+                </div>
+
+                <div>
+                  <Label>Date</Label>
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button
@@ -217,28 +308,16 @@ export default function FinancePage() {
                     </PopoverContent>
                   </Popover>
                 </div>
-                <div className='space-y-2'>
-                  <Label htmlFor='category'>Category</Label>
-                  <Select defaultValue='donation'>
-                    <SelectTrigger id='category'>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value='donation'>Donation</SelectItem>
-                      <SelectItem value='medical'>Medical</SelectItem>
-                      <SelectItem value='staff'>Staff Salary</SelectItem>
-                      <SelectItem value='utilities'>Utilities</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className='space-y-2'>
-                  <Label htmlFor='amount'>Amount</Label>
-                  <Input id='amount' type='number' placeholder='৳ 0.00' />
-                </div>
-                <div className='space-y-2'>
-                  <Label htmlFor='method'>Payment Method</Label>
-                  <Select defaultValue='cash'>
-                    <SelectTrigger id='method'>
+
+                <div>
+                  <Label>Payment Method</Label>
+                  <Select
+                    value={form.payment_method}
+                    onValueChange={(val) =>
+                      setForm({ ...form, payment_method: val })
+                    }
+                  >
+                    <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -248,15 +327,24 @@ export default function FinancePage() {
                     </SelectContent>
                   </Select>
                 </div>
-                <div className='space-y-2'>
-                  <Label htmlFor='notes'>Notes</Label>
-                  <Textarea id='notes' placeholder='Additional notes...' />
+
+                <div>
+                  <Label>Notes</Label>
+                  <Textarea
+                    value={form.notes}
+                    onChange={(e) =>
+                      setForm({ ...form, notes: e.target.value })
+                    }
+                    placeholder='Additional notes...'
+                  />
                 </div>
+
                 <Button
                   type='submit'
                   className='w-full bg-orange-500 hover:bg-orange-600'
+                  disabled={loading}
                 >
-                  Save Transaction
+                  {loading ? 'Saving...' : 'Save Transaction'}
                 </Button>
               </form>
             </CardContent>

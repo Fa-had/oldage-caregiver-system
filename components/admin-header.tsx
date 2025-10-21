@@ -7,15 +7,15 @@ const Header = () => {
     <header className='bg-gray-800 p-4 flex justify-between items-center text-white'>
       <div className='flex items-center space-x-4'>
         <div className='relative'>
-          <input
+          {/* <input
             type='text'
             placeholder='Search...'
             className='bg-gray-700 text-white py-2 px-4 rounded-full w-96 focus:outline-none'
-          />
+          /> */}
         </div>
-        <button className='bg-orange-600 text-white py-2 px-4 rounded-full'>
+        {/* <button className='bg-orange-600 text-white py-2 px-4 rounded-full'>
           + Add Resident
-        </button>
+        </button> */}
       </div>
       <div className='flex items-center space-x-4'>
         <button className='relative'>

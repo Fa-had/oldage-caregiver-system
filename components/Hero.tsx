@@ -16,15 +16,9 @@ export default function Hero() {
         <p className='mt-4 text-lg'>
           Let’s all help make life better for those who made our life better.
         </p>
-        {/* <button tu className='mt-6 bg-orange-500 px-6 py-3 rounded-lg text-white font-semibold hover:bg-orange-600'>
-          Donate
-        </button> */}
-        <Link
-          href='/donation'
-          className="mt-6 bg-orange-500 px-6 py-3 rounded-lg text-white font-semibold hover:bg-orange-600'"
-        >
-          Donate
-        </Link>
+        <button className='mt-6 bg-orange-500 px-6 py-3 rounded-lg text-white font-semibold hover:bg-orange-600'>
+          <Link href='/donation'>Donate</Link>
+        </button>
       </div>
       <div className='absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce'>
         <div className='w-6 h-10 border-2 border-orange-400 rounded-full flex justify-center'>

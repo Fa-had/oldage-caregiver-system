@@ -1,4 +1,4 @@
-export type UserRole = 'admin' | 'resident' | 'staff' | 'cook' | 'visitor'
+export type UserRole = 'admin' | 'resident_care' | 'cook'
 
 export interface User {
   id: number
@@ -27,15 +27,17 @@ export interface Appointment {
 }
 
 export interface Meal {
-  id: number
+  id?: number
   residentId: number
-  date: Date
+  requestedByStaffId?: number
+  date: string
   type: 'breakfast' | 'lunch' | 'dinner'
-  spicy: boolean
-  sugarFree: boolean
-  saltFree: boolean
+  quantity?: number
+  spicy?: boolean
+  sugarFree?: boolean
+  saltFree?: boolean
   notes?: string
-  status: 'pending' | 'prepared' | 'delivered'
+  status?: 'pending' | 'prepared' | 'delivered'
 }
 
 export interface Staff {
@@ -46,9 +48,11 @@ export interface Staff {
 
 export interface Notice {
   id: number
-  title: string
-  content: string
-  publishDate: Date
+  type: string
+  message: string
+  sender_name: string | null
+  sender_role: string | null
+  created_at: string
 }
 
 export interface Donation {
@@ -65,4 +69,18 @@ export interface Finance {
   amount: number
   source: string
   date: Date
+}
+export interface ContributionData {
+  amount: number
+  contributionType: 'one-time' | 'monthly'
+  name: string
+  email: string
+  phoneNumber: string
+  paymentMethod: 'credit-debit' | 'mobile-banking' | 'bank-transfer'
+}
+
+export interface ContributionResponse {
+  success: boolean
+  message: string
+  contributionId?: string
 }

@@ -20,12 +20,7 @@ import {
 import { CalendarIcon } from 'lucide-react'
 import DashboardLayout from '@/components/dashboard-layout'
 import { useRouter } from 'next/navigation'
-
-const mealOptions = [
-  { value: 'standard', label: 'Standard Meal' },
-  { value: 'vegetarian', label: 'Vegetarian' },
-  { value: 'special-diet', label: 'Special Diet' },
-]
+import { Input } from '@/components/ui/input'
 
 const specialTypes = [
   { value: 'regular', label: 'Regular' },
@@ -41,18 +36,46 @@ export default function GenerateMealPage() {
   const [lunch, setLunch] = useState('')
   const [dinner, setDinner] = useState('')
   const [specialType, setSpecialType] = useState('')
+  const [quantity, setQuantity] = useState<number>(1)
+  const [loading, setLoading] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Handle form submission
-    console.log({
-      date: format(date || new Date(), 'yyyy-MM-dd'),
-      breakfast,
-      lunch,
-      dinner,
-      specialType,
-    })
-    router.push('/admin/meals/generated')
+    if (!breakfast || !lunch || !dinner || !date)
+      return alert('All fields are required.')
+
+    setLoading(true)
+    const formattedDate = format(date || new Date(), 'yyyy-MM-dd')
+
+    try {
+      const mealsData = [
+        { type: 'breakfast', items: breakfast, quantity, date: formattedDate },
+        { type: 'lunch', items: lunch, quantity, date: formattedDate },
+        { type: 'dinner', items: dinner, quantity, date: formattedDate },
+      ]
+
+      // Save each meal in DB
+      for (const meal of mealsData) {
+        await fetch('/api/meals', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            date: meal.date,
+            type: meal.type,
+            quantity: meal.quantity,
+            notes: specialType,
+            status: 'pending',
+          }),
+        })
+      }
+
+      router.push('/admin/meals')
+    } catch (error) {
+      console.error('Error creating meals:', error)
+      alert('Failed to create meals.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -63,7 +86,7 @@ export default function GenerateMealPage() {
             Generate Meal Plan
           </h2>
           <p className='text-sm text-gray-600'>
-            Create meal plan for the selected date
+            Create daily meal plan for residents
           </p>
         </div>
 
@@ -74,67 +97,72 @@ export default function GenerateMealPage() {
           {/* Meal Selection Row */}
           <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
             <div className='space-y-2'>
-              <Label htmlFor='breakfast' className='text-sm font-medium'>
-                Breakfast
-              </Label>
+              <Label htmlFor='breakfast'>Breakfast</Label>
               <Select value={breakfast} onValueChange={setBreakfast}>
                 <SelectTrigger id='breakfast'>
                   <SelectValue placeholder='Select Breakfast Menu' />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value='bread-egg'>Bread & Egg</SelectItem>
-                  <SelectItem value='paratha-curry'>Paratha & Curry</SelectItem>
-                  <SelectItem value='khicuri'>Khicuri</SelectItem>
-                  <SelectItem value='oats-fruit'>Oats & Fruit</SelectItem>
+                  <SelectItem value='Bread & Egg'>Bread & Egg</SelectItem>
+                  <SelectItem value='Paratha & Curry'>
+                    Paratha & Curry
+                  </SelectItem>
+                  <SelectItem value='Khichuri'>Khichuri</SelectItem>
+                  <SelectItem value='Oats & Fruit'>Oats & Fruit</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className='space-y-2'>
-              <Label htmlFor='lunch' className='text-sm font-medium'>
-                Lunch
-              </Label>
+              <Label htmlFor='lunch'>Lunch</Label>
               <Select value={lunch} onValueChange={setLunch}>
                 <SelectTrigger id='lunch'>
                   <SelectValue placeholder='Select Lunch Menu' />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value='rice-meat'>Rice & Meat</SelectItem>
-                  <SelectItem value='rice-fish'>Rice & Fish</SelectItem>
-                  <SelectItem value='rice-vegetable'>
+                  <SelectItem value='Rice & Meat'>Rice & Meat</SelectItem>
+                  <SelectItem value='Rice & Fish'>Rice & Fish</SelectItem>
+                  <SelectItem value='Rice & Vegetable'>
                     Rice & Vegetable
                   </SelectItem>
-                  <SelectItem value='dal-rice'>Dal & Rice</SelectItem>
+                  <SelectItem value='Dal & Rice'>Dal & Rice</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className='space-y-2'>
-              <Label htmlFor='dinner' className='text-sm font-medium'>
-                Dinner
-              </Label>
+              <Label htmlFor='dinner'>Dinner</Label>
               <Select value={dinner} onValueChange={setDinner}>
                 <SelectTrigger id='dinner'>
                   <SelectValue placeholder='Select Dinner Menu' />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value='rice-vegetable'>
+                  <SelectItem value='Rice & Vegetable'>
                     Rice & Vegetable
                   </SelectItem>
-                  <SelectItem value='roti-curry'>Roti & Curry</SelectItem>
-                  <SelectItem value='soup-bread'>Soup & Bread</SelectItem>
-                  <SelectItem value='khichuri'>Khichuri</SelectItem>
+                  <SelectItem value='Roti & Curry'>Roti & Curry</SelectItem>
+                  <SelectItem value='Soup & Bread'>Soup & Bread</SelectItem>
+                  <SelectItem value='Khichuri'>Khichuri</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
 
-          {/* Special Type and Date */}
+          {/* Quantity and Special Type */}
           <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
             <div className='space-y-2'>
-              <Label htmlFor='specialType' className='text-sm font-medium'>
-                Special Type
-              </Label>
+              <Label htmlFor='quantity'>Quantity</Label>
+              <Input
+                id='quantity'
+                type='number'
+                min={1}
+                value={quantity}
+                onChange={(e) => setQuantity(Number(e.target.value))}
+              />
+            </div>
+
+            <div className='space-y-2'>
+              <Label htmlFor='specialType'>Special Type</Label>
               <Select value={specialType} onValueChange={setSpecialType}>
                 <SelectTrigger id='specialType'>
                   <SelectValue placeholder='Select Type' />
@@ -148,32 +176,31 @@ export default function GenerateMealPage() {
                 </SelectContent>
               </Select>
             </div>
+          </div>
 
-            <div className='space-y-2'>
-              <Label htmlFor='date' className='text-sm font-medium'>
-                Date
-              </Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    id='date'
-                    variant='outline'
-                    className='w-full justify-start text-left font-normal'
-                  >
-                    <CalendarIcon className='mr-2 h-4 w-4' />
-                    {format(date || new Date(), 'PPP')}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className='w-auto p-0' align='start'>
-                  <Calendar
-                    mode='single'
-                    selected={date}
-                    onSelect={setDate}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
+          {/* Date Picker */}
+          <div className='space-y-2'>
+            <Label htmlFor='date'>Date</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  id='date'
+                  variant='outline'
+                  className='w-full justify-start text-left font-normal'
+                >
+                  <CalendarIcon className='mr-2 h-4 w-4' />
+                  {format(date || new Date(), 'PPP')}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className='w-auto p-0' align='start'>
+                <Calendar
+                  mode='single'
+                  selected={date}
+                  onSelect={setDate}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
           </div>
 
           {/* Submit Button */}
@@ -182,8 +209,9 @@ export default function GenerateMealPage() {
               type='submit'
               size='lg'
               className='bg-orange-500 hover:bg-orange-600 px-8'
+              disabled={loading}
             >
-              Generate Meal
+              {loading ? 'Generating...' : 'Generate Meal'}
             </Button>
           </div>
         </form>

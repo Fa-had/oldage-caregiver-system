@@ -1,14 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Table,
   TableBody,
@@ -18,7 +12,25 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
+import { Calendar } from '@/components/ui/calendar'
+import { format } from 'date-fns'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
+import { CalendarIcon, Eye, Edit, Trash2 } from 'lucide-react'
+import DashboardLayout from '@/components/dashboard-layout'
+import Link from 'next/link'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import {
   Select,
   SelectContent,
@@ -26,206 +38,243 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Calendar } from '@/components/ui/calendar'
-import { format } from 'date-fns'
-import { Coffee, Soup, Moon } from 'lucide-react'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover'
-import { CalendarIcon, Eye } from 'lucide-react'
-import DashboardLayout from '@/components/dashboard-layout'
-import Link from 'next/link'
-
-const mealTypes = [
-  { name: 'Breakfast', count: 20, icon: Coffee, color: 'bg-blue-500' },
-  { name: 'Lunch', count: 30, icon: Soup, color: 'bg-green-500' },
-  { name: 'Dinner', count: 20, icon: Moon, color: 'bg-purple-500' },
-]
-
-const meals = [
-  {
-    id: 1,
-    date: '2023-10-27',
-    type: 'Breakfast',
-    category: 'Breakfast',
-    items: 'Chicken curry, Khicuri, Egg',
-    status: 'Active',
-  },
-  {
-    id: 2,
-    date: '2023-10-27',
-    type: 'Lunch',
-    category: 'Lunch',
-    items: 'Rice, Meat',
-    status: 'Active',
-  },
-  {
-    id: 3,
-    date: '2023-10-27',
-    type: 'Dinner',
-    category: 'Dinner',
-    items: 'Rice, Vegetable',
-    status: 'Active',
-  },
-  {
-    id: 4,
-    date: '2023-10-26',
-    type: 'Breakfast',
-    category: 'Breakfast',
-    items: 'Bread, Egg',
-    status: 'Active',
-  },
-  {
-    id: 5,
-    date: '2023-10-26',
-    type: 'Lunch',
-    category: 'Lunch',
-    items: 'Rice, Fish',
-    status: 'Active',
-  },
-]
 
 const statusColors = {
-  Active: 'bg-green-100 text-green-800 border-green-200',
-  Planned: 'bg-blue-100 text-blue-800 border-blue-200',
-  Completed: 'bg-gray-100 text-gray-800 border-gray-200',
+  pending: 'bg-yellow-100 text-yellow-800',
+  prepared: 'bg-blue-100 text-blue-800',
+  delivered: 'bg-green-100 text-green-800',
 }
 
 export default function MealsPage() {
+  const [meals, setMeals] = useState<any[]>([])
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date())
+  const [editingMeal, setEditingMeal] = useState<any | null>(null)
+  const [deleteId, setDeleteId] = useState<number | null>(null)
+  const [loading, setLoading] = useState(false)
+
+  async function fetchMeals() {
+    const formattedDate = selectedDate
+      ? format(selectedDate, 'yyyy-MM-dd')
+      : undefined
+    const res = await fetch(
+      formattedDate ? `/api/meals?date=${formattedDate}` : '/api/meals'
+    )
+    const data = await res.json()
+    setMeals(data)
+  }
+
+  useEffect(() => {
+    fetchMeals()
+  }, [selectedDate])
+
+  async function handleUpdate() {
+    setLoading(true)
+    await fetch(`/api/meals/${editingMeal.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: editingMeal.type,
+        quantity: editingMeal.quantity,
+        notes: editingMeal.notes,
+        status: editingMeal.status,
+      }),
+    })
+    setEditingMeal(null)
+    fetchMeals()
+    setLoading(false)
+  }
+
+  async function handleDelete() {
+    if (!deleteId) return
+    await fetch(`/api/meals/${deleteId}`, { method: 'DELETE' })
+    setDeleteId(null)
+    fetchMeals()
+  }
 
   return (
     <DashboardLayout userRole='admin'>
       <div className='space-y-6'>
-        {/* Meal Type Stats */}
-        <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
-          {mealTypes.map((mealType) => (
-            <Card key={mealType.name} className='bg-white shadow-sm'>
-              <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-                <CardTitle className='text-sm font-medium text-gray-600'>
-                  {mealType.name}
-                </CardTitle>
-                <mealType.icon
-                  className={`h-4 w-4 ${
-                    mealType.color === 'bg-blue-500'
-                      ? 'text-blue-500'
-                      : mealType.color === 'bg-green-500'
-                      ? 'text-green-500'
-                      : 'text-purple-500'
-                  }`}
-                />
-              </CardHeader>
-              <CardContent>
-                <div className='text-2xl font-bold text-gray-900'>
-                  {mealType.count} Meals
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+        <div className='flex items-center justify-between'>
+          <h2 className='text-lg font-semibold'>Meals Overview</h2>
+          <Button className='bg-orange-500 hover:bg-orange-600'>
+            <Link href={'/admin/meals/generate'}>Generate Meal</Link>
+          </Button>
         </div>
 
-        {/* Meals Table and Generate Button */}
-        <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
-          {/* Meals Table */}
-          <Card className='lg:col-span-2 bg-white shadow-sm'>
-            <CardHeader className='flex flex-row items-center justify-between'>
-              <CardTitle className='text-lg font-semibold'>
-                View Meals
-              </CardTitle>
-              <div className='flex items-center space-x-2'>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant='outline'
-                      className='w-[240px] justify-start text-left font-normal'
-                    >
-                      <CalendarIcon className='mr-2 h-4 w-4' />
-                      {format(selectedDate || new Date(), 'PPP')}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className='w-auto p-0' align='start'>
-                    <Calendar
-                      mode='single'
-                      selected={selectedDate}
-                      onSelect={setSelectedDate}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className='rounded-md border bg-white'>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Category</TableHead>
-                      <TableHead>Meals</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Action</TableHead>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant='outline'
+              className='w-[240px] justify-start text-left font-normal'
+            >
+              <CalendarIcon className='mr-2 h-4 w-4' />
+              {format(selectedDate || new Date(), 'PPP')}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className='w-auto p-0' align='start'>
+            <Calendar
+              mode='single'
+              selected={selectedDate}
+              onSelect={setSelectedDate}
+              initialFocus
+            />
+          </PopoverContent>
+        </Popover>
+
+        <Card className='bg-white shadow-sm'>
+          <CardHeader>
+            <CardTitle>Meals List</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Quantity</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Action</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {meals.length > 0 &&
+                  meals.map((meal) => (
+                    <TableRow key={meal.id}>
+                      <TableCell>{meal.date}</TableCell>
+                      <TableCell className='capitalize'>{meal.type}</TableCell>
+                      <TableCell>{meal.quantity}</TableCell>
+                      <TableCell>
+                        <Badge
+                          className={
+                            statusColors[
+                              meal.status as keyof typeof statusColors
+                            ]
+                          }
+                        >
+                          {meal.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className='flex space-x-2'>
+                        <Button
+                          variant='outline'
+                          size='sm'
+                          onClick={() => setEditingMeal(meal)}
+                        >
+                          <Edit className='h-4 w-4' />
+                        </Button>
+                        <Button
+                          variant='destructive'
+                          size='sm'
+                          onClick={() => setDeleteId(meal.id)}
+                        >
+                          <Trash2 className='h-4 w-4' />
+                        </Button>
+                      </TableCell>
                     </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {meals.map((meal) => (
-                      <TableRow key={meal.id}>
-                        <TableCell className='font-medium'>
-                          {meal.date}
-                        </TableCell>
-                        <TableCell>
-                          <Badge
-                            variant='outline'
-                            className='text-xs capitalize'
-                          >
-                            {meal.category}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className='max-w-[200px] truncate'>
-                          {meal.items}
-                        </TableCell>
-                        <TableCell>
-                          <Badge
-                            className={`text-xs ${
-                              statusColors[
-                                meal.status as keyof typeof statusColors
-                              ]
-                            }`}
-                          >
-                            {meal.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Button variant='ghost' size='sm'>
-                            <Eye className='h-4 w-4' />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            </CardContent>
-          </Card>
+                  ))}
+              </TableBody>
+            </Table>
+            {meals.length === 0 && (
+              <p className='p-4 text-center text-gray-500'>
+                No meals found for this date.
+              </p>
+            )}
+          </CardContent>
+        </Card>
 
-          {/* Generate Meal Card */}
-          <Card className='bg-white shadow-sm'>
-            <CardHeader>
-              <CardTitle className='text-lg font-semibold'>
-                Generate Meal
-              </CardTitle>
-            </CardHeader>
-            <CardContent className='space-y-4'>
-              <Button className='w-full bg-orange-500 hover:bg-orange-600'>
-                <Link href={'/admin/meals/generate'}>Create Meal</Link>
+        {/* Edit Modal */}
+        <Dialog open={!!editingMeal} onOpenChange={() => setEditingMeal(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Edit Meal</DialogTitle>
+            </DialogHeader>
+            {editingMeal && (
+              <div className='space-y-3'>
+                <div>
+                  <Label>Type</Label>
+                  <Select
+                    value={editingMeal.type}
+                    onValueChange={(v) =>
+                      setEditingMeal({ ...editingMeal, type: v })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value='breakfast'>Breakfast</SelectItem>
+                      <SelectItem value='lunch'>Lunch</SelectItem>
+                      <SelectItem value='dinner'>Dinner</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Quantity</Label>
+                  <Input
+                    type='number'
+                    value={editingMeal.quantity}
+                    onChange={(e) =>
+                      setEditingMeal({
+                        ...editingMeal,
+                        quantity: Number(e.target.value),
+                      })
+                    }
+                  />
+                </div>
+                <div>
+                  <Label>Notes</Label>
+                  <Input
+                    value={editingMeal.notes || ''}
+                    onChange={(e) =>
+                      setEditingMeal({ ...editingMeal, notes: e.target.value })
+                    }
+                  />
+                </div>
+                <div>
+                  <Label>Status</Label>
+                  <Select
+                    value={editingMeal.status}
+                    onValueChange={(v) =>
+                      setEditingMeal({ ...editingMeal, status: v })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value='pending'>Pending</SelectItem>
+                      <SelectItem value='prepared'>Prepared</SelectItem>
+                      <SelectItem value='delivered'>Delivered</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            )}
+            <DialogFooter>
+              <Button onClick={handleUpdate} disabled={loading}>
+                {loading ? 'Saving...' : 'Save Changes'}
               </Button>
-              {/* <Button className='w-full bg-orange-500 hover:bg-orange-600'>
-                <Link href={'/admin/meals/generated'}>Generated Meals</Link>
-              </Button> */}
-            </CardContent>
-          </Card>
-        </div>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Confirmation */}
+        <Dialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Confirm Delete</DialogTitle>
+            </DialogHeader>
+            <p>Are you sure you want to delete this meal?</p>
+            <DialogFooter>
+              <Button variant='outline' onClick={() => setDeleteId(null)}>
+                Cancel
+              </Button>
+              <Button variant='destructive' onClick={handleDelete}>
+                Delete
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </DashboardLayout>
   )

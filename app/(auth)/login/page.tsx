@@ -76,9 +76,9 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Checkbox } from '@/components/ui/checkbox'
 import { EyeOff } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
@@ -180,6 +180,17 @@ export default function LoginPage() {
               Login
             </Button>
           </form>
+          <div className='flex flex-col items-end'>
+            <Link href='/admin'>
+              <Button variant={'link'}>Admin</Button>
+            </Link>
+            <Link href='/resident-care'>
+              <Button variant={'link'}>Resident Care</Button>
+            </Link>
+            <Link href='/cook'>
+              <Button variant={'link'}>Cook</Button>
+            </Link>
+          </div>
         </div>
       </div>
     </div>

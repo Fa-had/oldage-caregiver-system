@@ -1,3 +1,6 @@
+'use client'
+
+import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
@@ -9,138 +12,206 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Clock, User, Calendar, Phone, MapPin } from 'lucide-react'
 import DashboardLayout from '@/components/dashboard-layout'
+import { Spinner } from '@/components/ui/spinner'
 
-const appointments = [
-  {
-    id: 1,
-    name: 'Ayesha Rahman',
-    type: 'Client',
-    contact: '+8801745678901',
-    date: '2024-03-15',
-    time: '10:00 AM',
-    person: 'Fatima Khan',
-    purpose: 'Project Discussion',
-    status: 'Waiting',
-  },
-  {
-    id: 2,
-    name: 'Omar Faruk',
-    type: 'Vendor',
-    contact: '+8801745678902',
-    date: '2024-03-16',
-    time: '02:00 PM',
-    person: 'Jamal Hasan',
-    purpose: 'Product Demo',
-    status: 'Confirmed',
-  },
-  {
-    id: 3,
-    name: 'Nadia Islam',
-    type: 'Interviewee',
-    contact: '+8801745678903',
-    date: '2024-03-17',
-    time: '11:00 AM',
-    person: 'Tasnim Ahmed',
-    purpose: 'Software Engineer',
-    status: 'Cancelled',
-  },
-  {
-    id: 4,
-    name: 'Raf Chowdhury',
-    type: 'Client',
-    contact: '+8801745678904',
-    date: '2024-03-18',
-    time: '09:30 AM',
-    person: 'Kamal Hossain',
-    purpose: 'Contract Review',
-    status: 'Waiting',
-  },
-  {
-    id: 5,
-    name: 'Sara Khan',
-    type: 'Vendor',
-    contact: '+8801745678905',
-    date: '2024-03-19',
-    time: '03:30 PM',
-    person: 'Nazia Haque',
-    purpose: 'Sales Presentation',
-    status: 'Confirmed',
-  },
-]
-
-const statusColors = {
-  Waiting: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-  Confirmed: 'bg-green-100 text-green-800 border-green-200',
-  Cancelled: 'bg-red-100 text-red-800 border-red-200',
+type Appointment = {
+  id: number
+  visitor_name: string
+  purpose: string
+  appointment_time: string
+  status: string
 }
 
 export default function AppointmentsPage() {
+  const [showModal, setShowModal] = useState(false)
+  const [appointments, setAppointments] = useState<Appointment[]>([])
+  const [loading, setLoading] = useState(true)
+  const [newAppointment, setNewAppointment] = useState({
+    visitorName: '',
+    purpose: '',
+    appointment_time: '',
+  })
+
+  useEffect(() => {
+    fetchAppointments()
+  }, [])
+
+  async function fetchAppointments() {
+    try {
+      setLoading(true)
+      const res = await fetch('/api/appointments')
+      const data = await res.json()
+      if (!data.error) {
+        setAppointments(data)
+        console.log('Data: ', data)
+      }
+      setLoading(false)
+    } catch (error) {
+      setLoading(false)
+      console.error('Error fetching appointments:', error)
+    }
+  }
+
+  async function addAppointment() {
+    await fetch('/api/appointments', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newAppointment),
+    })
+    setNewAppointment({ visitorName: '', purpose: '', appointment_time: '' })
+    fetchAppointments()
+  }
+
+  async function updateStatus(id: number, status: string) {
+    await fetch(`/api/appointments/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status }),
+    })
+    fetchAppointments()
+  }
+
+  async function deleteAppointment(id: number) {
+    await fetch(`/api/appointments/${id}`, { method: 'DELETE' })
+    fetchAppointments()
+  }
+
   return (
     <DashboardLayout userRole='admin'>
+      {showModal && (
+        <div className='fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-black/30'>
+          <div className='bg-white rounded-lg p-6 w-full max-w-md shadow-lg'>
+            <h2 className='text-xl font-semibold mb-4'>New Appointment</h2>
+            <div className='space-y-4'>
+              <Input
+                placeholder='Visitor Name'
+                value={newAppointment.visitorName}
+                onChange={(e) =>
+                  setNewAppointment({
+                    ...newAppointment,
+                    visitorName: e.target.value,
+                  })
+                }
+              />
+              <Input
+                placeholder='Purpose'
+                value={newAppointment.purpose}
+                onChange={(e) =>
+                  setNewAppointment({
+                    ...newAppointment,
+                    purpose: e.target.value,
+                  })
+                }
+              />
+              <Input
+                type='datetime-local'
+                value={newAppointment.appointment_time}
+                onChange={(e) =>
+                  setNewAppointment({
+                    ...newAppointment,
+                    appointment_time: e.target.value,
+                  })
+                }
+              />
+              <div className='flex justify-end space-x-2'>
+                <Button variant='outline' onClick={() => setShowModal(false)}>
+                  Cancel
+                </Button>
+                <Button
+                  className='bg-orange-500 hover:bg-orange-600'
+                  onClick={async () => {
+                    await addAppointment()
+                    setShowModal(false)
+                  }}
+                >
+                  Submit
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className='space-y-4'>
         <div className='flex items-center justify-between'>
-          <h2 className='text-xl font-semibold text-gray-900'>
-            Appointments List
-          </h2>
-          <Button className='bg-orange-500 hover:bg-orange-600'>
+          <h2 className='text-xl font-semibold'>Appointments</h2>
+          <Button
+            onClick={() => setShowModal(true)}
+            className='bg-orange-500 hover:bg-orange-600'
+          >
             + Add Appointment
           </Button>
         </div>
 
-        <Input placeholder='Search appointments...' className='max-w-md' />
+        <Input
+          placeholder='Search appointments...'
+          className='max-w-md'
+          onChange={(e) => console.log(e.target.value)}
+        />
 
         <div className='rounded-md border bg-white'>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Full Name</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Contact Number</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Time</TableHead>
-                <TableHead>Person To</TableHead>
-                <TableHead>Purpose of Visit</TableHead>
-                <TableHead>Action</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {appointments.map((appointment) => (
-                <TableRow key={appointment.id}>
-                  <TableCell className='font-medium'>
-                    {appointment.name}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant='outline' className='text-xs'>
-                      {appointment.type}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{appointment.contact}</TableCell>
-                  <TableCell>{appointment.date}</TableCell>
-                  <TableCell>
-                    <div className='flex items-center space-x-1'>
-                      <Clock className='h-3 w-3' />
-                      <span>{appointment.time}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>{appointment.person}</TableCell>
-                  <TableCell>{appointment.purpose}</TableCell>
-                  <TableCell>
-                    <Badge
-                      className={`text-xs ${
-                        statusColors[
-                          appointment.status as keyof typeof statusColors
-                        ]
-                      }`}
-                    >
-                      {appointment.status}
-                    </Badge>
-                  </TableCell>
+          {loading ? (
+            <p className='p-4 text-gray-500'>Loading...</p>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Visitor</TableHead>
+                  <TableHead>Purpose</TableHead>
+                  <TableHead>Date/Time</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {appointments.length > 0 ? (
+                  appointments.map((a) => (
+                    <TableRow key={a.id}>
+                      <TableCell>{a.visitor_name}</TableCell>
+                      <TableCell>{a.purpose}</TableCell>
+                      <TableCell>
+                        {new Date(a.appointment_time).toLocaleString()}
+                      </TableCell>
+                      <TableCell>
+                        <Badge>{a.status}</Badge>
+                      </TableCell>
+                      <TableCell className='space-x-2'>
+                        <Button
+                          variant='outline'
+                          size='sm'
+                          onClick={() => updateStatus(a.id, 'approved')}
+                        >
+                          Approve
+                        </Button>
+                        <Button
+                          variant='outline'
+                          size='sm'
+                          onClick={() => updateStatus(a.id, 'rejected')}
+                        >
+                          Reject
+                        </Button>
+                        <Button
+                          variant='destructive'
+                          size='sm'
+                          onClick={() => deleteAppointment(a.id)}
+                        >
+                          Delete
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell align='center' colSpan={8}>
+                      <Spinner />
+                      Loading...
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          )}
         </div>
       </div>
     </DashboardLayout>
