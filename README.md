@@ -347,10 +347,6 @@ docker run -p 3000:3000 oldage-caregiver-system
 - Secure session management
 - Role-based access control on all routes
 
-## License
-
-This project is private and proprietary. Unauthorized copying or distribution is prohibited.
-
 ## Support
 
 For issues, questions, or suggestions, please contact the development team or open an issue in the project repository.
