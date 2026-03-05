@@ -1,6 +1,3 @@
--- ====== Sample seed data for elderly_care (Bangladeshi-style) ======
--- Assumes tables already exist as in the corrected schema.
-
 -- Insert rooms
 INSERT INTO rooms (id, room_number, capacity, occupied, status)
 VALUES

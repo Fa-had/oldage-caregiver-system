@@ -54,7 +54,6 @@ export default function GenerateMealPage() {
         { type: 'dinner', items: dinner, quantity, date: formattedDate },
       ]
 
-      // Save each meal in DB
       for (const meal of mealsData) {
         await fetch('/api/meals', {
           method: 'POST',

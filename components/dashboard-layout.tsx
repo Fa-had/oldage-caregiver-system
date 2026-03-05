@@ -9,6 +9,7 @@ import {
   FormInput,
   Home,
   HomeIcon,
+  LogOut,
   MessagesSquare,
   Users,
 } from 'lucide-react'
@@ -33,6 +34,7 @@ const navItems: Record<UserRole, NavItem[]> = {
     { href: '/admin/medical', label: 'Medical', icon: Activity },
     { href: '/admin/notices', label: 'Notices', icon: MessagesSquare },
     { href: '/admin/finance', label: 'Finance', icon: Activity },
+    { href: '/', label: 'Log Out', icon: LogOut },
   ],
   resident_care: [
     { href: '/resident-care', label: 'Overview', icon: Home },
@@ -40,11 +42,13 @@ const navItems: Record<UserRole, NavItem[]> = {
     { href: '/resident-care/medical', label: 'Medical', icon: Activity },
     { href: '/resident-care/meals', label: 'Meal', icon: ForkKnife },
     { href: '/resident-care/notices', label: 'Notices', icon: MessagesSquare },
+    { href: '/', label: 'Log Out', icon: LogOut },
   ],
   cook: [
     { href: '/cook', label: 'Overview', icon: Home },
     { href: '/cook/meals', label: 'Meal List', icon: ForkKnife },
     { href: '/cook/notices', label: 'Notices', icon: MessagesSquare },
+    { href: '/', label: 'Log Out', icon: LogOut },
   ],
 }
 
@@ -92,7 +96,7 @@ export default function DashboardLayout({
 
       {/* Main Content */}
       <main className='flex-1'>
-        <Header />
+        <Header userRole={userRole} />
         <div className={`p-8 ${className}`}>{children}</div>
       </main>
     </div>

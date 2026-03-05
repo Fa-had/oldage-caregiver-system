@@ -1,19 +1,12 @@
 import { NextResponse } from 'next/server'
-import mysql from 'mysql2/promise'
-
+import { getPool } from '@/lib/db'
 export async function GET() {
   try {
-    const connection = await mysql.createConnection({
-      host: process.env.DB_HOST,
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME,
-    })
-
-    const cookId = 1 // temporary
+    const pool = await getPool()
+    const cookId = 1
 
     // Count today's meals
-    const [todayMeals]: any = await connection.execute(
+    const [todayMeals]: any = await pool.execute(
       `
       SELECT COUNT(*) AS count
       FROM meals
@@ -22,7 +15,7 @@ export async function GET() {
     )
 
     // Count tomorrow's meals
-    const [tomorrowMeals]: any = await connection.execute(
+    const [tomorrowMeals]: any = await pool.execute(
       `
       SELECT COUNT(*) AS count
       FROM meals
@@ -31,7 +24,7 @@ export async function GET() {
     )
 
     // Count prepared meals
-    const [preparedMeals]: any = await connection.execute(
+    const [preparedMeals]: any = await pool.execute(
       `
       SELECT COUNT(*) AS count
       FROM meals
@@ -40,7 +33,7 @@ export async function GET() {
     )
 
     // Count pending meals
-    const [pendingMeals]: any = await connection.execute(
+    const [pendingMeals]: any = await pool.execute(
       `
       SELECT COUNT(*) AS count
       FROM meals
@@ -49,7 +42,7 @@ export async function GET() {
     )
 
     // Latest notices (joined with staff to get name and role)
-    const [notices]: any = await connection.execute(
+    const [notices]: any = await pool.execute(
       `
       SELECT n.id, n.type, n.message, s.full_name AS sender_name, s.role AS sender_role, n.created_at
       FROM notices n
@@ -58,8 +51,6 @@ export async function GET() {
       LIMIT 5
       `
     )
-
-    await connection.end()
 
     return NextResponse.json({
       todayMeals: todayMeals[0]?.count || 0,

@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
   Table,
@@ -98,15 +97,6 @@ export default function ResidentsPage() {
                         {r.status}
                       </Badge>
                     </TableCell>
-                    {/* <TableCell>
-                      <Button
-                        variant='ghost'
-                        size='sm'
-                        onClick={() => handleDelete(r.id)}
-                      >
-                        <Trash2 className='h-4 w-4 text-red-600' />
-                      </Button>
-                    </TableCell> */}
                   </TableRow>
                 ))
               ) : (

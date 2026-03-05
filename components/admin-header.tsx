@@ -1,8 +1,9 @@
 // components/Header.tsx
 
+import { UserRole } from '@/types'
 import { BellIcon, UserIcon } from 'lucide-react'
 
-const Header = () => {
+const Header = ({ userRole }: { userRole: UserRole }) => {
   return (
     <header className='bg-gray-800 p-4 flex justify-between items-center text-white'>
       <div className='flex items-center space-x-4'>
@@ -27,7 +28,13 @@ const Header = () => {
         </button>
         <button className='flex items-center space-x-2'>
           <UserIcon className='h-6 w-6 text-white' />
-          <span>Admin</span>
+          {userRole === 'admin' ? (
+            <span>Admin</span>
+          ) : userRole === 'resident_care' ? (
+            <span>Caregiver</span>
+          ) : (
+            <span>Cook</span>
+          )}
         </button>
       </div>
     </header>

@@ -60,6 +60,7 @@ export default function GenerateMealPage() {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
+            residentId: '1',
             date: meal.date,
             type: meal.type,
             quantity: meal.quantity,

@@ -1,8 +1,7 @@
 // app/api/meals/route.ts
 import { NextResponse } from 'next/server'
-import { getPool } from '@/lib/db' // or "@/app/api/db" if your helper is there
+import { getPool } from '@/lib/db'
 
-// Fetch all meals for the cook for a specific date
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
@@ -24,7 +23,7 @@ export async function GET(request: Request) {
         m.notes,
         r.full_name AS resident_full_name
       FROM meals m
-      JOIN residents r ON m.residentId = r.id
+      JOIN residents r ON m.resident_id = r.id
       WHERE m.date = ?
       ORDER BY r.full_name
       `,

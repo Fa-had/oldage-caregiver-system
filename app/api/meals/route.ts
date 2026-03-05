@@ -21,21 +21,14 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const {
-      residentId,
-      date,
-      type,
-      quantity,
-      spicy,
-      sugarFree,
-      saltFree,
-      notes,
-    } = await req.json()
+    const { residentId, date, type, quantity, notes } = await req.json()
+    console.log('ResidentId: ', residentId)
+
     const pool = await getPool()
     await pool.query(
-      `INSERT INTO meals (resident_id, date, type, quantity, spicy, sugarFree, saltFree, notes)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      [residentId, date, type, quantity, spicy, sugarFree, saltFree, notes]
+      `INSERT INTO meals (resident_id, date, type, quantity, notes)
+       VALUES (?, ?, ?, ?, ?)`,
+      [residentId, date, type, quantity, notes]
     )
     return NextResponse.json(
       { message: 'Meal added successfully' },
